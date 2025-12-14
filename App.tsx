@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight } from 'lucide-react';
 import { Chat } from "@google/genai";
-import FileUpload from './components/FileUpload';
+import FileUpload from './components/FileUploadInput';
 import ResultDisplay from './components/ResultDisplay';
 import ApiKeyModal from './components/ApiKeyModal';
 import { createSession, generateStep1, generateNextStep } from './services/geminiService';
