@@ -5,7 +5,7 @@ import { FileData } from "../types";
 export const createSession = (apiKey: string): Chat => {
   const ai = new GoogleGenAI({ apiKey });
   return ai.chats.create({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       maxOutputTokens: 8192,
@@ -31,8 +31,13 @@ export const generateStep1 = async (
 Dựa vào file đề gốc, hãy sinh ra **ĐỀ BIẾN THỂ SỐ 1**.
 Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
 
+⚠️ QUAN TRỌNG NHẤT:
+1. **ĐẾM SỐ CÂU HỎI TRONG ĐỀ GỐC (Ví dụ: 50 câu).**
+2. **SINH RA ĐÚNG SỐ LƯỢNG CÂU ĐÓ KHÔNG ĐƯỢC THIẾU CÂU NÀO.**
+3. Đảm bảo cấu trúc (Phần I, Phần II...) giống hệt đề gốc.
+
 Yêu cầu:
-- Đề thi: Đủ số lượng câu như đề gốc. Đầy đủ nội dung.
+- Đề thi: Giữ nguyên số lượng câu. Đầy đủ nội dung từng câu.
 - Đáp án: Câu dễ chỉ cần đáp án (1.A). Câu khó phải có lời giải vắn tắt.`
   };
 
@@ -59,6 +64,11 @@ export const generateNextStep = async (
   const prompt = `BƯỚC ${stepNumber}:
 Tiếp tục sinh ra **ĐỀ BIẾN THỂ SỐ ${stepNumber}** (Khác số liệu/cách hỏi so với các đề trước).
 Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ ${stepNumber}**.
+
+⚠️ QUAN TRỌNG NHẤT:
+1. **ĐẢM BẢO SỐ LƯỢNG CÂU HỎI PHẢI BẰNG ĐỀ GỐC**.
+2. **KHÔNG ĐƯỢC TỰ Ý RÚT GỌN HAY LÀM MẪU.**
+3. Phải sinh ra TOÀN BỘ đề thi.
 
 Yêu cầu:
 - Đề thi: Đủ số lượng câu.
