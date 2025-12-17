@@ -1,4 +1,3 @@
-```typescript
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight, Settings } from 'lucide-react';
 import { Chat } from "@google/genai";
@@ -54,34 +53,34 @@ const App: React.FC = () => {
     // Attempt with current model, then valid backups
     // We start from currentModelIndexRef.current to avoid resetting to primary if we already switched
     for (let i = currentModelIndexRef.current; i < MODELS.length; i++) {
-        try {
-            await executeFn(chatSessionRef.current!);
-            // Success
-            currentModelIndexRef.current = i; // Upkeep the working model
-            return;
-        } catch (err: any) {
-            console.warn(`Step '${stepName}' failed with model ${ MODELS[i].id }: `, err);
-            lastError = err;
+      try {
+        await executeFn(chatSessionRef.current!);
+        // Success
+        currentModelIndexRef.current = i; // Upkeep the working model
+        return;
+      } catch (err: any) {
+        console.warn(`Step '${stepName}' failed with model ${MODELS[i].id}:`, err);
+        lastError = err;
 
-            const isLastModel = i === MODELS.length - 1;
-            if (!isLastModel) {
-                 // Prepare for fallback
-                 resetOutput();
-                 const nextModel = MODELS[i + 1].id;
-                 console.log(`Switching to fallback model: ${ nextModel } `);
+        const isLastModel = i === MODELS.length - 1;
+        if (!isLastModel) {
+          // Prepare for fallback
+          resetOutput();
+          const nextModel = MODELS[i + 1].id;
+          console.log(`Switching to fallback model: ${nextModel}`);
 
-                 // Reconstruct session with new model
-                 if (chatSessionRef.current) {
-                     // If we are deep in the process (Step 2 or 3), we need to preserve history
-                     // If we are at Step 1, createSession is fine, but cloneSession handles empty history too (mostly).
-                     // Ideally for Step 1 we might want fresh session, but cloneSession is safer if we just want to swap model on existing object concept
+          // Reconstruct session with new model
+          if (chatSessionRef.current) {
+            // If we are deep in the process (Step 2 or 3), we need to preserve history
+            // If we are at Step 1, createSession is fine, but cloneSession handles empty history too (mostly).
+            // Ideally for Step 1 we might want fresh session, but cloneSession is safer if we just want to swap model on existing object concept
 
-                     // However, if Step 1 failed, history is likely empty or broken.
-                     // If Step 2 failed, we need Step 1's context.
-                     chatSessionRef.current = await cloneSession(apiKey, chatSessionRef.current, nextModel);
-                 }
-            }
+            // However, if Step 1 failed, history is likely empty or broken.
+            // If Step 2 failed, we need Step 1's context.
+            chatSessionRef.current = await cloneSession(apiKey, chatSessionRef.current, nextModel);
+          }
         }
+      }
     }
 
     throw lastError;
@@ -107,11 +106,11 @@ const App: React.FC = () => {
 
     try {
       await executeStepWithRetry(
-          "Step 1",
-          async (chat) => {
-             await generateStep1(chat, file, (chunk) => setCol1(prev => prev + chunk));
-          },
-          () => setCol1('') // Reset if retrying
+        "Step 1",
+        async (chat) => {
+          await generateStep1(chat, file, (chunk) => setCol1(prev => prev + chunk));
+        },
+        () => setCol1('') // Reset if retrying
       );
     } catch (err: any) {
       handleError(err);
@@ -122,11 +121,11 @@ const App: React.FC = () => {
     setState(AppState.PROCESSING_STEP_2);
     try {
       await executeStepWithRetry(
-          "Step 2",
-          async (chat) => {
-              await generateNextStep(chat, 2, (chunk) => setCol2(prev => prev + chunk));
-          },
-          () => setCol2('')
+        "Step 2",
+        async (chat) => {
+          await generateNextStep(chat, 2, (chunk) => setCol2(prev => prev + chunk));
+        },
+        () => setCol2('')
       );
     } catch (err: any) {
       handleError(err);
@@ -136,13 +135,13 @@ const App: React.FC = () => {
     // --- STEP 3 ---
     setState(AppState.PROCESSING_STEP_3);
     try {
-        await executeStepWithRetry(
-            "Step 3",
-            async (chat) => {
-                await generateNextStep(chat, 3, (chunk) => setCol3(prev => prev + chunk));
-            },
-            () => setCol3('')
-        );
+      await executeStepWithRetry(
+        "Step 3",
+        async (chat) => {
+          await generateNextStep(chat, 3, (chunk) => setCol3(prev => prev + chunk));
+        },
+        () => setCol3('')
+      );
       setState(AppState.COMPLETE);
     } catch (err: any) {
       handleError(err);
@@ -160,8 +159,8 @@ const App: React.FC = () => {
 
   const handleExport = () => {
     if (!col1 && !col2 && !col3) return;
-    const fullContent = `${ col1 } \n\n ***\n\n${ col2 } \n\n ***\n\n${ col3 } `;
-    const fileName = file ? `Bo_3_De_Thi_${ file.name.split('.')[0] } ` : 'ExamGen_Output';
+    const fullContent = `${col1}\n\n***\n\n${col2}\n\n***\n\n${col3}`;
+    const fileName = file ? `Bo_3_De_Thi_${file.name.split('.')[0]}` : 'ExamGen_Output';
     exportToDoc(fullContent, fileName);
   };
 
@@ -262,11 +261,10 @@ const App: React.FC = () => {
             <div className="mb-6 flex justify-center">
               <div className="bg-white rounded-full shadow-sm border border-gray-200 px-6 py-2 flex items-center space-x-4 text-sm font-medium">
                 {/* Step 1 Indicator */}
-                <div className={`flex items - center ${
-  state === AppState.PROCESSING_STEP_1 ? 'text-indigo-600 animate-pulse' :
-    state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? 'text-green-600' :
-      'text-gray-400'
-} `}>
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_1 ? 'text-indigo-600 animate-pulse' :
+                    state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
                   {state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? (
                     <FileCheck className="w-5 h-5 mr-2" />
                   ) : (
@@ -278,11 +276,10 @@ const App: React.FC = () => {
                 <ArrowRight className="w-4 h-4 text-gray-300" />
 
                 {/* Step 2 Indicator */}
-                <div className={`flex items - center ${
-  state === AppState.PROCESSING_STEP_2 ? 'text-indigo-600 animate-pulse' :
-    state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? 'text-green-600' :
-      'text-gray-400'
-} `}>
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_2 ? 'text-indigo-600 animate-pulse' :
+                    state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
                   {state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? (
                     <FileCheck className="w-5 h-5 mr-2" />
                   ) : (
@@ -294,11 +291,10 @@ const App: React.FC = () => {
                 <ArrowRight className="w-4 h-4 text-gray-300" />
 
                 {/* Step 3 Indicator */}
-                <div className={`flex items - center ${
-  state === AppState.PROCESSING_STEP_3 ? 'text-indigo-600 animate-pulse' :
-    state === AppState.COMPLETE ? 'text-green-600' :
-      'text-gray-400'
-} `}>
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_3 ? 'text-indigo-600 animate-pulse' :
+                    state === AppState.COMPLETE ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
                   {state === AppState.COMPLETE ? (
                     <FileCheck className="w-5 h-5 mr-2" />
                   ) : (
