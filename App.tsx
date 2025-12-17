@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight } from 'lucide-react';
+import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight, Settings } from 'lucide-react';
 import { Chat } from "@google/genai";
 import FileUpload from './components/FileUpload';
 import ResultDisplay from './components/ResultDisplay';
@@ -36,6 +36,7 @@ const App: React.FC = () => {
   const handleSaveApiKey = (key: string) => {
     localStorage.setItem('GEMINI_API_KEY', key);
     setApiKey(key);
+    setShowApiKeyModal(false);
   };
 
   // Orchestrator for the 3 steps
@@ -131,6 +132,15 @@ const App: React.FC = () => {
 
           <div className="flex items-center space-x-3">
             <button
+              onClick={() => setShowApiKeyModal(true)}
+              className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors"
+              title="Cài đặt API Key"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">API Key</span>
+            </button>
+
+            <button
               onClick={handleExport}
               disabled={!col1}
               className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
@@ -191,22 +201,59 @@ const App: React.FC = () => {
             {/* Progress Bar / Status */}
             <div className="mb-6 flex justify-center">
               <div className="bg-white rounded-full shadow-sm border border-gray-200 px-6 py-2 flex items-center space-x-4 text-sm font-medium">
-                <div className={`flex items-center ${state >= AppState.PROCESSING_STEP_1 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">1</span>
+                {/* Step 1 Indicator */}
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_1 ? 'text-indigo-600 animate-pulse' :
+                    state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
+                  {state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? (
+                    <FileCheck className="w-5 h-5 mr-2" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">1</span>
+                  )}
                   Bước 1
                 </div>
+
                 <ArrowRight className="w-4 h-4 text-gray-300" />
-                <div className={`flex items-center ${state >= AppState.PROCESSING_STEP_2 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">2</span>
+
+                {/* Step 2 Indicator */}
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_2 ? 'text-indigo-600 animate-pulse' :
+                    state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
+                  {state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? (
+                    <FileCheck className="w-5 h-5 mr-2" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">2</span>
+                  )}
                   Bước 2
                 </div>
+
                 <ArrowRight className="w-4 h-4 text-gray-300" />
-                <div className={`flex items-center ${state >= AppState.PROCESSING_STEP_3 ? 'text-indigo-600' : 'text-gray-400'}`}>
-                  <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">3</span>
+
+                {/* Step 3 Indicator */}
+                <div className={`flex items-center ${state === AppState.PROCESSING_STEP_3 ? 'text-indigo-600 animate-pulse' :
+                    state === AppState.COMPLETE ? 'text-green-600' :
+                      'text-gray-400'
+                  }`}>
+                  {state === AppState.COMPLETE ? (
+                    <FileCheck className="w-5 h-5 mr-2" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-2 text-xs border-current">3</span>
+                  )}
                   Bước 3
                 </div>
               </div>
             </div>
+
+            {/* Error Banner if any during processing */}
+            {error && (
+              <div className="mb-6 mx-auto max-w-2xl w-full p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl flex items-center space-x-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span className="break-all">{error}</span>
+                <button onClick={reset} className="underline font-bold ml-auto pl-4">Thử lại</button>
+              </div>
+            )}
 
             {/* 3 Column Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full min-h-0">
@@ -224,7 +271,7 @@ const App: React.FC = () => {
                           <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                           <span>Đang xử lý Bước 1...</span>
                         </div>
-                      ) : "Chờ xử lý..."}
+                      ) : state === AppState.ERROR ? "Đã dừng do lỗi" : "Chờ xử lý..."}
                     </div>
                   )}
                 </div>
@@ -243,7 +290,8 @@ const App: React.FC = () => {
                           <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                           <span>Đang xử lý Bước 2...</span>
                         </div>
-                      ) : state > AppState.PROCESSING_STEP_2 ? "Hoàn tất" : "Chờ Bước 1..."}
+                      ) : (state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR) ? "Hoàn tất" :
+                        state === AppState.ERROR ? "Đã dừng do lỗi" : "Chờ Bước 1..."}
                     </div>
                   )}
                 </div>
@@ -262,7 +310,8 @@ const App: React.FC = () => {
                           <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                           <span>Đang xử lý Bước 3...</span>
                         </div>
-                      ) : state === AppState.COMPLETE ? "Hoàn tất" : "Chờ Bước 2..."}
+                      ) : state === AppState.COMPLETE ? "Hoàn tất" :
+                        state === AppState.ERROR ? "Đã dừng do lỗi" : "Chờ Bước 2..."}
                     </div>
                   )}
                 </div>
