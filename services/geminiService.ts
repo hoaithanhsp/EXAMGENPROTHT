@@ -1,33 +1,35 @@
-import { GoogleGenAI, Chat, Part } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 import { FileData } from "../types";
 
-export const createSession = (apiKey: string): Chat => {
-  const ai = new GoogleGenAI({ apiKey });
-  return ai.chats.create({
+// Kiểu dữ liệu cho chat model
+type ChatModel = any;
+
+export const createSession = (apiKey: string): ChatModel => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
     model: "gemini-3-pro-preview",
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
+    systemInstruction: SYSTEM_INSTRUCTION,
+    generationConfig: {
       maxOutputTokens: 8192,
     },
   });
+  
+  // Tạo chat session
+  const chat = model.startChat({
+    history: [],
+  });
+  
+  return chat;
 };
 
 // Bước 1: Sinh Đề 1 & Đáp án 1 (Có File gốc)
 export const generateStep1 = async (
-  chat: Chat,
+  chat: ChatModel,
   file: FileData,
   onChunk: (text: string) => void
 ): Promise<void> => {
-  const filePart: Part = {
-    inlineData: {
-      mimeType: file.type,
-      data: file.data,
-    },
-  };
-
-  const textPart: Part = {
-    text: `BƯỚC 1:
+  const prompt = `BƯỚC 1:
 Dựa vào file đề gốc, hãy sinh ra **ĐỀ BIẾN THỂ SỐ 1**.
 Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
 
@@ -38,26 +40,36 @@ Ngay sau đó, viết **ĐÁP ÁN CHI TIẾT CHO ĐỀ SỐ 1**.
 
 Yêu cầu:
 - Đề thi: Giữ nguyên số lượng câu. Đầy đủ nội dung từng câu.
-- Đáp án: Câu dễ chỉ cần đáp án (1.A). Câu khó phải có lời giải vắn tắt.`
-  };
+- Đáp án: Câu dễ chỉ cần đáp án (1.A). Câu khó phải có lời giải vắn tắt.`;
 
   try {
-    const result = await chat.sendMessageStream({
-      message: [filePart, textPart]
-    });
+    // Chuyển đổi base64 data thành Part
+    const imagePart = {
+      inlineData: {
+        data: file.data,
+        mimeType: file.type,
+      },
+    };
 
-    for await (const chunk of result) {
-      if (chunk.text) onChunk(chunk.text);
+    // Gửi message với file và prompt
+    const result = await chat.sendMessageStream([imagePart, prompt]);
+
+    // Xử lý stream response
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      if (chunkText) {
+        onChunk(chunkText);
+      }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Error Step 1:", error);
-    throw error;
+    throw new Error(error?.message || "Lỗi khi sinh đề bước 1");
   }
 };
 
 // Bước 2 & 3: Sinh Đề tiếp theo (Dựa trên ngữ cảnh cũ)
 export const generateNextStep = async (
-  chat: Chat,
+  chat: ChatModel,
   stepNumber: number,
   onChunk: (text: string) => void
 ): Promise<void> => {
@@ -75,15 +87,16 @@ Yêu cầu:
 - Đáp án: Câu dễ chỉ cần đáp án. Câu khó phải có lời giải vắn tắt.`;
 
   try {
-    const result = await chat.sendMessageStream({
-      message: prompt
-    });
+    const result = await chat.sendMessageStream(prompt);
 
-    for await (const chunk of result) {
-      if (chunk.text) onChunk(chunk.text);
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      if (chunkText) {
+        onChunk(chunkText);
+      }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Gemini Error Step ${stepNumber}:`, error);
-    throw error;
+    throw new Error(error?.message || `Lỗi khi sinh đề bước ${stepNumber}`);
   }
 };
