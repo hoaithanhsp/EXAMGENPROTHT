@@ -3,9 +3,9 @@ import { SYSTEM_INSTRUCTION } from "../constants";
 import { FileData } from "../types";
 
 export const MODELS = [
-  { id: "gemini-3-pro-preview", name: "Gemini 3.0 Pro (Tư duy sâu)" },
-  { id: "gemini-2.0-flash-exp", name: "Gemini Flash 2.0 (Tốc độ cao)" },
-  { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro (Ổn định)" }
+  { id: "gemini-3-pro-preview", name: "Gemini 3.0 Pro (Mới nhất)" },
+  { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash (Tốc độ cao)" },
+  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro (Cân bằng)" }
 ];
 
 export const createSession = (apiKey: string, model: string = "gemini-3-pro-preview"): Chat => {
