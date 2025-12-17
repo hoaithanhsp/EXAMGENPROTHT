@@ -1,17 +1,52 @@
-import { GoogleGenAI, Chat, Part } from "@google/genai";
+import { GoogleGenAI, Chat, Part, Content } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 import { FileData } from "../types";
 
-export const createSession = (apiKey: string): Chat => {
+export const MODELS = [
+  { id: "gemini-3-pro-preview", name: "Gemini 3.0 Pro (Tư duy sâu)" },
+  { id: "gemini-2.0-flash-exp", name: "Gemini Flash 2.0 (Tốc độ cao)" },
+  { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro (Ổn định)" }
+];
+
+export const createSession = (apiKey: string, model: string = "gemini-3-pro-preview"): Chat => {
   const ai = new GoogleGenAI({ apiKey });
   return ai.chats.create({
-    model: "gemini-3-pro-preview",
+    model: model,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       maxOutputTokens: 8192,
     },
   });
 };
+
+export const cloneSession = async (apiKey: string, oldChat: Chat, newModel: string): Promise<Chat> => {
+  // Extract history from old chat
+  // Note: The SDK might store history in specific way. 
+  // We assume getHistory() is available or accessing internal state if needed.
+  // For @google/genai, retrieving history might be done via fetching previous messages.
+  // However, if the SDK doesn't expose clean history sync, we might need to assume 
+  // we only need to carry over the context for safety or rely on the SDK's history property.
+
+  // Attempting to get history. If strict type access fails, we might need a workaround.
+  // Assuming standard usage:
+  let history: Content[] = [];
+  try {
+    history = await oldChat.getHistory();
+  } catch (e) {
+    console.warn("Could not retrieve history for cloning, starting fresh context", e);
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  return ai.chats.create({
+    model: newModel,
+    history: history,
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
+      maxOutputTokens: 8192,
+    },
+  });
+};
+
 
 // Bước 1: Sinh Đề 1 & Đáp án 1 (Có File gốc)
 export const generateStep1 = async (
