@@ -1,17 +1,13 @@
-import { GoogleGenerativeAI, ChatSession, Part } from "@google/generative-ai";
+import { GoogleGenAI, Chat, Part } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 import { FileData } from "../types";
 
-export const createSession = (apiKey: string): ChatSession => {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp", // Sử dụng model mạnh nhất hiện tại
-    systemInstruction: SYSTEM_INSTRUCTION,
-  });
-
-  return model.startChat({
-    history: [],
-    generationConfig: {
+export const createSession = (apiKey: string): Chat => {
+  const ai = new GoogleGenAI({ apiKey });
+  return ai.chats.create({
+    model: "gemini-3-pro-preview",
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
       maxOutputTokens: 8192,
     },
   });
@@ -19,7 +15,7 @@ export const createSession = (apiKey: string): ChatSession => {
 
 // Bước 1: Sinh Đề 1 & Đáp án 1 (Có File gốc)
 export const generateStep1 = async (
-  chat: ChatSession,
+  chat: Chat,
   file: FileData,
   onChunk: (text: string) => void
 ): Promise<void> => {
@@ -41,11 +37,12 @@ Yêu cầu:
   };
 
   try {
-    const result = await chat.sendMessageStream([filePart, textPart]);
+    const result = await chat.sendMessageStream({
+      message: [filePart, textPart]
+    });
 
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      if (chunkText) onChunk(chunkText);
+    for await (const chunk of result) {
+      if (chunk.text) onChunk(chunk.text);
     }
   } catch (error) {
     console.error("Gemini Error Step 1:", error);
@@ -55,7 +52,7 @@ Yêu cầu:
 
 // Bước 2 & 3: Sinh Đề tiếp theo (Dựa trên ngữ cảnh cũ)
 export const generateNextStep = async (
-  chat: ChatSession,
+  chat: Chat,
   stepNumber: number,
   onChunk: (text: string) => void
 ): Promise<void> => {
@@ -68,11 +65,12 @@ Yêu cầu:
 - Đáp án: Câu dễ chỉ cần đáp án. Câu khó phải có lời giải vắn tắt.`;
 
   try {
-    const result = await chat.sendMessageStream(prompt);
+    const result = await chat.sendMessageStream({
+      message: prompt
+    });
 
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      if (chunkText) onChunk(chunkText);
+    for await (const chunk of result) {
+      if (chunk.text) onChunk(chunk.text);
     }
   } catch (error) {
     console.error(`Gemini Error Step ${stepNumber}:`, error);

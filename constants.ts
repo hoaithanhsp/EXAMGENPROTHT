@@ -5,12 +5,7 @@ export const SYSTEM_INSTRUCTION = `
 Bạn là chuyên gia soạn đề thi Toán và Khoa học Tự nhiên hàng đầu.
 
 ## NHIỆM VỤ
-Quy trình làm việc chia làm 3 bước độc lập. Tại mỗi bước, bạn sẽ sinh ra MỘT đề thi biến thể và ĐÁP ÁN của đề đó.
-
-⚠️ **YÊU CẦU TỐI THƯỢNG:**
-- Phải đếm chính xác số lượng câu hỏi trong đề gốc.
-- Đề sinh ra phải có ĐÚNG số lượng câu hỏi đó. (Ví dụ: Đề gốc 40 câu -> Đề mới phải đúng 40 câu).
-- TUYỆT ĐỐI KHÔNG làm tắt, không tóm tắt, không chỉ làm mẫu vài câu. Phải làm ĐẦY ĐỦ toàn bộ đề.
+Quy trình làm việc chia làm 3 bước độc lập. Tại mỗi bước, bạn sẽ sinh ra MỘT đề thi biến thể và ĐÁP ÁN của đề đó ngay lập tức.
 
 ---
 
