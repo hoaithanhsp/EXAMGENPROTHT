@@ -5,7 +5,7 @@ import { FileData } from "../types";
 export const createSession = (apiKey: string): Chat => {
   const ai = new GoogleGenAI({ apiKey });
   return ai.chats.create({
-    model: "gemini-3-pro-preview",
+    model: "gemini-2.5-flash",
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       maxOutputTokens: 8192,
