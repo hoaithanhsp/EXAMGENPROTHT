@@ -151,8 +151,28 @@ const App: React.FC = () => {
 
   const handleError = (err: any) => {
     setState(AppState.ERROR);
-    // Display raw error message
-    const message = err.message || JSON.stringify(err);
+    let message = "Có lỗi xảy ra";
+
+    if (typeof err === 'string') {
+      message = err;
+    } else if (err instanceof Error) {
+      message = err.message;
+    } else if (err && typeof err === 'object') {
+      message = JSON.stringify(err);
+    }
+
+    // Try to parse if it's a JSON string (common with API errors)
+    try {
+      const parsed = JSON.parse(message);
+      if (parsed.error && parsed.error.message) {
+        message = parsed.error.message;
+      } else if (parsed.message) {
+        message = parsed.message;
+      }
+    } catch (e) {
+      // Not a JSON string, keep original
+    }
+
     setError(message);
     console.error("Full Error Object:", err);
   };
@@ -262,8 +282,8 @@ const App: React.FC = () => {
               <div className="bg-white rounded-full shadow-sm border border-gray-200 px-6 py-2 flex items-center space-x-4 text-sm font-medium">
                 {/* Step 1 Indicator */}
                 <div className={`flex items-center ${state === AppState.PROCESSING_STEP_1 ? 'text-indigo-600 animate-pulse' :
-                    state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? 'text-green-600' :
-                      'text-gray-400'
+                  state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? 'text-green-600' :
+                    'text-gray-400'
                   }`}>
                   {state > AppState.PROCESSING_STEP_1 && state !== AppState.ERROR ? (
                     <FileCheck className="w-5 h-5 mr-2" />
@@ -277,8 +297,8 @@ const App: React.FC = () => {
 
                 {/* Step 2 Indicator */}
                 <div className={`flex items-center ${state === AppState.PROCESSING_STEP_2 ? 'text-indigo-600 animate-pulse' :
-                    state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? 'text-green-600' :
-                      'text-gray-400'
+                  state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? 'text-green-600' :
+                    'text-gray-400'
                   }`}>
                   {state > AppState.PROCESSING_STEP_2 && state !== AppState.ERROR ? (
                     <FileCheck className="w-5 h-5 mr-2" />
@@ -292,8 +312,8 @@ const App: React.FC = () => {
 
                 {/* Step 3 Indicator */}
                 <div className={`flex items-center ${state === AppState.PROCESSING_STEP_3 ? 'text-indigo-600 animate-pulse' :
-                    state === AppState.COMPLETE ? 'text-green-600' :
-                      'text-gray-400'
+                  state === AppState.COMPLETE ? 'text-green-600' :
+                    'text-gray-400'
                   }`}>
                   {state === AppState.COMPLETE ? (
                     <FileCheck className="w-5 h-5 mr-2" />
