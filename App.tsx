@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight } from 'lucide-react';
-import { Chat } from "@google/genai";
 import FileUpload from './components/FileUploadInput';
 import ResultDisplay from './components/ResultDisplay';
 import ApiKeyModal from './components/ApiKeyModal';
@@ -21,7 +20,7 @@ const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
 
-  const chatSessionRef = useRef<Chat | null>(null);
+  const chatSessionRef = useRef<any>(null);
 
   useEffect(() => {
     if (!apiKey) {
