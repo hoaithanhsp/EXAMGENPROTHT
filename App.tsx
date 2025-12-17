@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, Play, RefreshCw, AlertCircle, Calculator, Loader2, FileCheck, ArrowRight, Key } from 'lucide-react';
-import { Chat } from "@google/genai";
-import FileUpload from './components/FileUpload';
+import { ChatSession } from "@google/generative-ai";
+import FileUpload from './components/FileUploadInput';
 import ResultDisplay from './components/ResultDisplay';
 import { createSession, generateStep1, generateNextStep } from './services/geminiService';
 import { exportToDoc } from './utils/exportUtils';
@@ -24,7 +24,7 @@ const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.IDLE);
   const [error, setError] = useState<string | null>(null);
 
-  const chatSessionRef = useRef<Chat | null>(null);
+  const chatSessionRef = useRef<ChatSession | null>(null);
 
   // Check for API key on mount
   useEffect(() => {
