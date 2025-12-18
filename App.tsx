@@ -400,6 +400,27 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
+      <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-3">
+          <p className="font-bold text-indigo-600 text-sm md:text-base">
+            ĐĂNG KÝ KHOÁ HỌC THỰC CHIẾN VIẾT SKKN, TẠO APP DẠY HỌC, TẠO MÔ PHỎNG TRỰC QUAN CHỈ VỚI 1 CÂU LỆNH:{" "}
+            <a href="https://tinyurl.com/khoahocAI2025" target="_blank" rel="noopener noreferrer" className="underline hover:text-indigo-800">
+              https://tinyurl.com/khoahocAI2025
+            </a>
+          </p>
+          <div className="text-gray-600 text-sm flex flex-col items-center space-y-1">
+            <p>Mọi thông tin vui lòng liên hệ:</p>
+            <div className="flex flex-col sm:flex-row items-center space-y-1 sm:space-y-0 sm:space-x-4">
+              <a href="https://www.facebook.com/tranhoaithanhvicko/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">
+                FB: https://www.facebook.com/tranhoaithanhvicko/
+              </a>
+              <span className="hidden sm:inline text-gray-300">|</span>
+              <span className="hover:text-gray-900">Zalo: 0348296773</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
