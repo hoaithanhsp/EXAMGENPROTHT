@@ -163,14 +163,29 @@ const App: React.FC = () => {
 
     // Try to parse if it's a JSON string (common with API errors)
     try {
-      const parsed = JSON.parse(message);
-      if (parsed.error && parsed.error.message) {
-        message = parsed.error.message;
-      } else if (parsed.message) {
-        message = parsed.message;
+      // Check if the message itself looks like JSON but wrapped or just dirty
+      const jsonStart = message.indexOf('{');
+      const jsonEnd = message.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        const potentialJson = message.substring(jsonStart, jsonEnd + 1);
+        const parsed = JSON.parse(potentialJson);
+
+        if (parsed.error) {
+          if (parsed.error.message) message = parsed.error.message;
+          else message = JSON.stringify(parsed.error);
+        } else if (parsed.message) {
+          message = parsed.message;
+        }
       }
     } catch (e) {
-      // Not a JSON string, keep original
+      // Not a JSON string or parse failed, keep original
+    }
+
+    // Customize friendly messages for common errors
+    if (message.includes("429") || message.includes("Quota exceeded") || message.includes("RESOURCE_EXHAUSTED")) {
+      message = "Hết hạn mức sử dụng (Quota Exceeded). Vui lòng thử lại sau hoặc đổi API Key khác.";
+    } else if (message.includes("API key not valid")) {
+      message = "API Key không hợp lệ. Vui lòng kiểm tra lại.";
     }
 
     setError(message);
