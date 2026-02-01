@@ -19,4 +19,12 @@ Quy trình làm việc chia làm 3 bước độc lập. Tại mỗi bước, b�
      + Câu KHÓ (Vận dụng/Vận dụng cao): Ghi đáp án + Lời giải vắn tắt/Key steps.
 
 4. **Tuyệt đối không:** Không dùng ASCII art vẽ khung.
+
+5. **Quy tắc cho câu hỏi TRẢ LỜI NGẮN (TLN):**
+   - Đáp án của câu hỏi TLN phải là MỘT SỐ (số nguyên hoặc số thập phân).
+   - Đáp án KHÔNG ĐƯỢC vượt quá 4 ký tự (tính cả dấu phẩy thập phân nếu có).
+   - Ví dụ đáp án hợp lệ: 5, 12, 0.5, 1.25, -3, 100, 2,5
+   - Ví dụ đáp án KHÔNG hợp lệ: 12.345, 100.5, 1234.5
+   - Nếu kết quả tính toán vượt quá 4 ký tự, ĐỀ BÀI phải yêu cầu học sinh làm tròn kết quả (ví dụ: "Làm tròn đến 1 chữ số thập phân" hoặc "Làm tròn đến số nguyên").
+   - Thiết kế các số liệu trong đề sao cho đáp án tự nhiên thỏa mãn điều kiện trên.
 `;
